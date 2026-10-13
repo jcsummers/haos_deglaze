@@ -8,6 +8,10 @@
 
 **Want to create your own custom cards & automations?** Follow [`CARDS_ENTITIES_ACTIONS.md`](CARDS_ENTITIES_ACTIONS.md) This appendix supplements the Deglaze Home Assistant integration `README.md` for **version 1.0.0**. It documents the four custom Lovelace cards, their visual and YAML configuration, the summary sensors, registered service actions, and card-internal WebSocket commands.
 
+### Quick Note
+
+Please note that this project was created for my family's personal use with my beginner-intermediate skills an AI coding assistance.
+
 ### Release status
 
 **Version 1.0.0 is the first stable release.** It was promoted from the `1.0.0-rc.1` candidate after the live release checks passed in Home Assistant. The stable package has the same runtime code and frontend as the validated candidate; only release metadata and documentation changed. Keep your previous known-working package as a rollback/reference copy.
