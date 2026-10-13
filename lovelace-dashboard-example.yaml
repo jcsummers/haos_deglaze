@@ -1,0 +1,30 @@
+# Add this view to a dashboard in YAML mode, or copy the cards into a UI-managed dashboard.
+# First register /local/deglaze-cards.js as a JavaScript Module resource.
+title: Deglaze
+views:
+  - title: Deglaze
+    path: deglaze
+    icon: mdi:food
+    cards:
+      - type: custom:deglaze-grocery-add-card
+        title: Grocery list
+        placeholder: e.g. chickpeas
+        default_filter: pending
+        grid_columns: 6
+
+      - type: custom:deglaze-upcoming-meals-card
+        title: Upcoming meals
+        domain: deglaze_poc
+        count: 5
+        grid_columns: 6
+
+      - type: custom:deglaze-weekly-meal-planner-card
+        title: Weekly meal planner
+        domain: deglaze_poc
+        display_days: 7
+        grid_columns: 12
+        refresh_interval: 120
+
+      - type: custom:deglaze-recipe-library-card
+        title: Recipe library
+        grid_columns: 12
