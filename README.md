@@ -2,14 +2,7 @@
 
 ## Release status
 
-**Version 1.0.0 is the first stable release.** It was promoted from the `1.0.0-rc.1` candidate after the user confirmed that the live release checks passed in their Home Assistant environment. The stable package has the same runtime code and frontend as the validated `1.0.0-rc.1` candidate; only release metadata and documentation changed. Retain the 0.9.1 package and the release-candidate archive as rollback/reference copies.
-
-### Release review
-
-- Manifest version is `1.0.0`; the integration domain remains `deglaze_poc` so the existing configuration entry can be reused.
-- Runtime integration code and the four-card frontend are unchanged from the validated `1.0.0-rc.1` candidate; only release metadata and documentation were promoted.
-- The local regression suite, Python compilation, JavaScript syntax, JSON/YAML parsing, and archive integrity checks pass for the stable package.
-- Live checks were confirmed by the user, including startup, authentication renewal, error recovery, grocery/recipe/collection/meal-plan workflows, and Recorder-safe sensor attributes. Deglaze's API is undocumented, so future upstream changes may still require maintenance.
+**Version 1.0.0 is the first stable release.** It was promoted from the `1.0.0-rc.1` candidate after it was confirmed that the live release checks passed in their Home Assistant environment.
 
 ### Installation and post-upgrade check
 
@@ -21,82 +14,6 @@
 6. Keep a backup and check logs periodically for errors caused by changes to Deglaze's undocumented API.
 
 ---
-
-## Version 0.9.1 hotfix — startup compatibility
-
-Version 0.9.1 fixes a startup import error introduced with the recipe-to-grocery WebSocket schema. The previous schema referenced `vol.ensure_list`, which is not available in the `vol` module supplied by the affected Home Assistant runtime. That caused the entire `deglaze_poc` integration to fail during import. The ingredient and store ID fields now require JSON arrays explicitly using the built-in `list` validator, then validate array lengths and each string element. This keeps the intended input contract (arrays of valid IDs) without using the missing helper. No API payload or card behavior is changed.
-
-To apply the 0.9.1 hotfix, back up your Home Assistant configuration, replace `custom_components/deglaze_poc/` with the folder included in that release, keep the folder name unchanged, and restart Home Assistant. Update the dashboard JavaScript Module resource to `/local/deglaze-cards.js?v=0.9.1` and hard-refresh the browser. After restarting, confirm the integration loads and the new startup error no longer appears. Then test the existing recipe-to-grocery workflow with one or two low-stakes ingredients.
-
-
-Unofficial community-built Home Assistant integration for Deglaze. It reuses Firebase passwordless sign-in and refresh-token handling, synchronizes the grocery list, recipe library, collections, and meal plan, and provides four custom Lovelace cards. Version 0.9.0 added a select-review-confirm workflow for adding chosen recipe ingredients to the grocery list, including conservative duplicate warnings, optional store assignment, server-side validation, and post-write verification. The recipe wording and quantities are preserved; ingredient scaling and pantry exclusions are not included. Earlier releases added recipe collection browsing/editing, the aligned weekly meal planner with configurable displayed days, and grocery store management, assignment, filtering, grouping, and sorting. This API is undocumented, so validate the new workflow against a harmless recipe before regular use.
-
-
-
-## Version 0.9.0 — recipe-to-grocery workflow
-
-The Recipe Library card now lets you select ingredients from a recipe, review the planned additions, and explicitly confirm before adding them to the grocery list. It preserves each ingredient's original wording and quantities; the integration does not scale quantities, infer pantry staples, or rewrite recipe text.
-
-Before confirmation, the card reads the current grocery list and flags possible duplicates using a conservative text heuristic. Duplicate candidates are skipped by default; you can explicitly enable **Add ingredients flagged as possible duplicates anyway**. This is a warning heuristic, not a guarantee: different phrasings can evade detection, and similar names can sometimes be false positives. The backend repeats the duplicate check against a fresh list before writing.
-
-You can optionally assign selected ingredients to one or more existing stores. The integration validates store IDs and selected ingredient IDs against the current synchronized recipe/list data. Because Deglaze's observed add-item API is a single-item request, ingredients are added sequentially and the list is refreshed once to verify results. If a request fails or a refresh cannot verify the outcome, the card reports a partial/ambiguous result and instructs you to refresh and compare the grocery list with Deglaze before retrying. It deliberately does not auto-retry writes, to avoid creating duplicates after a timeout.
-
-To upgrade, back up your Home Assistant configuration, replace `custom_components/deglaze_poc/` with the folder in this release, keep the integration folder name unchanged, copy `www/deglaze-cards.js` into `/config/www/deglaze-cards.js`, and restart Home Assistant. In **Settings → Dashboards → Resources**, set the JavaScript Module resource to `/local/deglaze-cards.js?v=1.0.0` and hard-refresh the browser. The grocery sensor continues to expose summary attributes only; the full list is retrieved over the integration's WebSocket command.
-
-### Verify recipe-to-grocery before regular use
-
-1. Choose a low-stakes recipe and select one or two ingredients.
-2. Select **Review selected ingredients** and verify the duplicate warnings and store choices.
-3. Confirm the additions, then verify that the items and store assignments appear in Deglaze and in the Home Assistant grocery card.
-4. Try selecting an ingredient already on the list. It should be flagged and skipped by default; explicitly opt into adding it only if you intend to create another entry.
-5. If the operation reports `partial`, an uncertain result, or a refresh failure, refresh and compare the list against Deglaze before trying again. Do not blindly retry an ambiguous write.
-
-## Version 0.8.0 — grocery store management, assignment, filtering, and grouping
-
-The Grocery List card now exposes **Manage stores** to create a store, rename it, and delete it. A delete operation requires a second explicit confirmation in the card; Deglaze removes store associations but keeps grocery items. Each item can be assigned to multiple existing stores through its **Assign stores** panel, and a selected store can also be assigned while adding an item. The card adds a store filter, grouping by store or category, and alphabetical/newest-first sort choices. Group-by-store may show one item in more than one group if it is assigned to multiple stores. Items without store/category data remain visible under Unassigned or Uncategorized. The sensor still stores summary attributes only; store and item detail data remains in the WebSocket response.
-
-New services are `deglaze_poc.create_grocery_store`, `deglaze_poc.rename_grocery_store`, `deglaze_poc.delete_grocery_store`, and `deglaze_poc.set_grocery_item_stores`. Existing `deglaze_poc.add_grocery_item` accepts an optional `stores` list. Store and item writes are based on request shapes observed in Deglaze's app bundle; because this API is undocumented, use a temporary store and low-stakes grocery item for the first live tests. Store deletion intentionally does not delete grocery items, but their store association is removed.
-
-## Version 0.7.3 — configurable number of displayed days
-
-This release adds a **Number of days to display** option to the Weekly Meal Planner visual editor. Choose from 1 to 7 days; the default remains 7 so existing dashboards retain the 0.7.2 appearance. The card continues to fetch the full Monday–Sunday range from Deglaze and week navigation still moves a full seven-day week. The 0.7.2 aligned matrix layout, Breakfast/Lunch/Dinner/Snack columns, horizontal scrolling, edit controls, and removal confirmation are otherwise unchanged. The range heading and item count reflect the displayed days, and if a meal is moved to a hidden day within the loaded week, the card reports that it is outside the configured display range.
-
-To upgrade from 0.7.2, replace `custom_components/deglaze_poc/` with this release, restart Home Assistant, update the frontend resource to `/local/deglaze-cards.js?v=0.7.3`, and hard-refresh the browser. In the Weekly Meal Planner visual editor, set **Number of days to display** to 3, 5, or another value from 1–7. Set it to 7 to retain the full-week view.
-
-## Version 0.7.2 — aligned weekly planner layout
-
-This release changes the weekly meal planner from a seven-day tile layout to a fixed matrix: one horizontal row per day, with separate **Breakfast**, **Lunch**, **Dinner**, and **Snack** columns. Each day's row stays aligned regardless of how many meals are planned; an optional **Other** column appears only if Deglaze returns unexpected meal labels, so unusual entries remain visible. The grid scrolls horizontally on narrow cards rather than squeezing four meal columns into an unreadable layout, and the day-name column stays pinned while scrolling. Meal editing, date navigation, leftovers markers, removal confirmation, and the async WebSocket handler fix from 0.7.1 remain intact.
-
-When upgrading from 0.7.1, replace the integration files, restart Home Assistant, update the frontend resource to `/local/deglaze-cards.js?v=0.7.2`, and hard-refresh the browser. The grid is easier to scan when the card has 12 columns in a Sections dashboard; narrower layouts remain usable with horizontal scrolling.
-
-## Version 0.7.1 hotfix
-
-This patch fixes the Weekly Meal Planner's infinite loading state. The `deglaze_poc/meal-plan/range` WebSocket handler performs asynchronous network I/O, so it must be decorated with Home Assistant's `@websocket_api.async_response`. Without that wrapper, Home Assistant invokes it as a synchronous callback and logs `coroutine 'websocket_get_meal_plan_range' was never awaited`; the frontend request receives no result and keeps loading. The fix wraps the async handler using Home Assistant's supported WebSocket API pattern. No recipe, grocery, meal-plan mutation, authentication, or collection-editing logic is otherwise changed.
-
-When upgrading from 0.7.0, replace the integration files, restart Home Assistant, update the frontend resource to `/local/deglaze-cards.js?v=0.7.1`, and hard-refresh the browser. The weekly planner should load the selected week. Confirm in the log that the `websocket_get_meal_plan_range was never awaited` warning no longer appears.
-
-## What changed in this build
-
-Version 0.4.1 added the response-enabled `deglaze_poc.test_auth_renewal` action. Version 0.4.2 adds controlled error-handling diagnostics and improves network/timeout error conversion. The new `deglaze_poc.test_error_handling` action injects a synthetic HTTP 503 response locally into the same API request/error-handling path used by ordinary calls, then makes a real read-only `GET /lists` request to verify recovery. The simulated 503 is never sent to Deglaze; only the recovery read reaches the network. Response bodies and credentials are not logged. It does not modify grocery or meal-plan data.
-
-This release retains the visual configuration editors for all four custom cards and native sizing hints for Home Assistant Sections dashboards. The recipe library defaults to full width, can be set to 6/9/12 columns in the editor, and uses a container-aware layout so its recipe list/details stack when the card is narrow. The grocery and meal cards default to a half-width preference and can use 3/6/9/12 columns. The upcoming-meals editor also lets you choose the displayed meal types.
-
-- **Recipe collection browsing (0.5.0):** the recipe card has a collection selector grouped into **Your collections** and **Built-in categories**. It reads the existing `collections` manifest captured by `POST /recipes/get-list`, handles structured tags, maps them to collection IDs, and supports recipes assigned to multiple collections.
-- **Recipe collection editing (new in 0.6.0):** each selected recipe has an **Organize collections** checklist with a Save button. It can add or remove a recipe from existing, visible user collections (for example Cuban or Cooked & Liked) and built-in tag categories. It does not create, rename, hide, or delete collection definitions. The integration validates the recipe and selected collection IDs against the synchronized library, computes only membership differences, applies operations through the observed `POST /recipes/bulk-edit` request shape (`type: bulkAddRemoveTag`, `action: add|remove`, `collectionId`, and `recipeIds`), then forces a recipe-library refresh and confirms the updated memberships before reporting success. If a save partially succeeds, the error explicitly says some changes may have applied and asks you to review memberships before retrying. The endpoint is undocumented; verify against a test recipe and collection first.
-- **Combined filtering:** select a collection and search by recipe title at the same time. The selector shows member counts, the recipe list displays assigned collection chips, and the selected recipe's collection names appear with its details. “All recipes” clears the collection filter. Counts are derived from active recipes synchronized in Home Assistant.
-- **Collection hygiene:** hidden and deleted collection definitions are excluded from the selector, and system filters such as “Recently Added” are not treated as recipe-tag collections. If an incremental response omits collection metadata, the integration retains the last known manifest rather than clearing the selector. Only visible tag collections are offered for membership editing; hidden/deleted definitions and non-tag filters are excluded.
-
-
-- **No longer creates one sensor per recipe.** The integration keeps a single Recipe Library count/status sensor. A custom recipe-browser card retrieves compact recipe titles over Home Assistant's authenticated WebSocket API, then requests full details from the synchronized local cache when a recipe is selected. This does not call Deglaze's `recipe-viewed` endpoint.
-- **Legacy cleanup:** on first setup after upgrading, the integration removes entity-registry entries created by the prior per-recipe sensors for this Deglaze config entry. Those old recipe entities will no longer exist, so remove or update any automations that reference them.
-- **Grocery list + quick add:** enter an ingredient and press Enter or Add; view existing grocery items, search, filter All / To buy / Completed, and mark an item bought or move it back to To buy. It defaults to To buy items; completed items remain accessible through the filter and the summary counts still include them. The Grocery List sensor stores counts and metadata only, not the full item array, avoiding oversized Recorder attributes. The card reads full item data through an authenticated Home Assistant WebSocket command.
-- **Upcoming meals:** shows a configurable number of future meals, sorted by date and meal slot, with visible Breakfast/Lunch/Dinner/Snack labels and a leftovers indicator. It reads directly from the integration through WebSocket, so a renamed Home Assistant entity ID will not leave the card stuck on “Waiting for sensor…”. A Refresh button can trigger a manual sync.
-- **Weekly meal planner (introduced in 0.7.0; async handler fixed in 0.7.1):** displays the configured 1–7 days (default 7) in a horizontal day-by-meal matrix while continuing to fetch the full Monday–Sunday range, with aligned day rows and Breakfast/Lunch/Dinner/Snack columns, with previous/next week navigation, a jump back to the current week, manual refresh, and exact-week reads that also work when navigating outside the coordinator’s rolling 30-day sensor range. Planned items can be edited for date, meal slot, and leftovers using the item’s current version. Removing an item requires a second confirmation. Each mutation is followed by an exact-range refresh and a verification message. Changing the recipe of an existing planned item is not included; remove it and add the replacement recipe through the Recipe Library for now.
-- **Recipe library browser:** search by title, inspect ingredient and instruction sections, and add a recipe to a selected date and Breakfast/Lunch/Dinner/Snack slot. It also exposes the leftovers option.
-- **Meal-plan editing services (new in 0.7.0):** update a planned item's date, meal slot, or leftovers flag using `id`, `type`, and `version`; remove a planned item with a separate service that the card calls only after the user confirms. These use observed Deglaze web-app request shapes; test them with a low-stakes planned meal first.
-- **Existing services retained:** add grocery item, mark an existing grocery item pending/completed, add a recipe to the meal plan, and refresh. There is intentionally no grocery-item delete service because Deglaze's UI flow inspected for this integration does not provide item deletion.
-- **Partial failure reporting:** grocery refresh can continue even if recipe-library or meal-plan synchronization fails. Check the API Status sensor's `errors`, `recipe_sync_error`, and `meal_plan_sync_error` attributes.
-- **Network and timeout handling:** Firebase and Deglaze transport timeouts/client errors are converted into safe integration errors without exposing request URLs, response bodies, or credentials. The new diagnostic action tests a local synthetic HTTP 503 followed by a real read-only recovery request.
 
 ## Files
 
