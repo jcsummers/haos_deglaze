@@ -1,7 +1,7 @@
 {
   "domain": "deglaze_poc",
-  "name": "Deglaze POC",
-  "version": "0.1.0",
+  "name": "Deglaze",
+  "version": "1.0.0",
   "config_flow": true,
   "single_config_entry": true,
   "integration_type": "service",
