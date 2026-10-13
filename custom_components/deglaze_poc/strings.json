@@ -1,0 +1,37 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Connect Deglaze (proof of concept)",
+        "description": "Enter the email address used for Deglaze. In the next step, paste a fresh sign-in link from your Deglaze email. Do not open/click the link before pasting it here, because the one-time code may be consumed.",
+        "data": {
+          "email": "Deglaze email address"
+        }
+      },
+      "link": {
+        "title": "Complete email-link sign-in",
+        "description": "Request a sign-in email through the Deglaze website, copy the full link from the email, and paste it below. The link contains a one-time credential; it is sent directly from Home Assistant to Firebase and is not stored in the config entry or written to logs.",
+        "data": {
+          "sign_in_link": "Full sign-in link from the Deglaze email"
+        }
+      }
+    },
+    "error": {
+      "invalid_email": "Enter a valid email address.",
+      "invalid_link": "This is not a recognized Deglaze Firebase sign-in link. Request a fresh link and paste it without opening it.",
+      "invalid_auth": "The link is expired or already used. Request a new Deglaze sign-in email and try again.",
+      "auth_failed": "Firebase rejected the sign-in link. Verify the account email and try a fresh link.",
+      "cannot_connect": "Home Assistant could not complete sign-in or retrieve the Deglaze grocery list. Check connectivity and try again."
+    },
+    "abort": {
+      "already_configured": "This Deglaze account is already configured."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "grocery_api_status": {
+        "name": "Grocery API Status"
+      }
+    }
+  }
+}
