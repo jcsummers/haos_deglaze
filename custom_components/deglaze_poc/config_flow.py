@@ -1,4 +1,4 @@
-"""UI setup flow for the Deglaze authentication/list proof of concept."""
+"""UI setup flow for the unofficial Deglaze integration."""
 from __future__ import annotations
 
 from typing import Any
@@ -26,7 +26,7 @@ from .const import (
 
 
 class DeglazePOCConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
-    """Configure Deglaze POC using a one-time Firebase email sign-in link."""
+    """Configure Deglaze using a one-time Firebase email sign-in link."""
 
     VERSION = 1
 
@@ -103,7 +103,7 @@ class DeglazePOCConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             await self.async_set_unique_id(client.user_id)
             self._abort_if_unique_id_configured()
             return self.async_create_entry(
-                title="Deglaze POC",
+                title="Deglaze",
                 data={
                     CONF_EMAIL: self._email,
                     CONF_FIREBASE_API_KEY: client.firebase_api_key,
