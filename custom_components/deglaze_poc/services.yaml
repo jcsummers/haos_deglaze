@@ -1,0 +1,218 @@
+add_grocery_item:
+  name: Add grocery item
+  description: Add a manual item to the Deglaze grocery list. Grocery-item deletion is not supported.
+  fields:
+    text:
+      name: Item text
+      description: Name or description of the item.
+      required: true
+      selector:
+        text:
+    suggestion_id:
+      name: Suggestion ID
+      description: Optional Deglaze suggestion ID, if adding a suggested item.
+      required: false
+      selector:
+        text:
+    manual_category:
+      name: Manual category
+      description: Optional manual category.
+      required: false
+      selector:
+        text:
+    stores:
+      name: Stores
+      description: Optional existing store IDs to assign to the new item.
+      required: false
+      selector:
+        object:
+create_grocery_store:
+  name: Create grocery store
+  description: Create a named Deglaze store.
+  fields:
+    name:
+      name: Store name
+      description: Name of the new store.
+      required: true
+      selector:
+        text:
+rename_grocery_store:
+  name: Rename grocery store
+  description: Rename an existing Deglaze store using its latest version.
+  fields:
+    store_id:
+      name: Store ID
+      description: ID of an existing store from the grocery card.
+      required: true
+      selector:
+        text:
+    name:
+      name: New name
+      description: New store name.
+      required: true
+      selector:
+        text:
+delete_grocery_store:
+  name: Delete grocery store
+  description: Delete a store definition. Items remain on the grocery list but lose this store association.
+  fields:
+    store_id:
+      name: Store ID
+      description: ID of the store to delete.
+      required: true
+      selector:
+        text:
+set_grocery_item_stores:
+  name: Set grocery item stores
+  description: Replace the store assignments for an existing grocery item.
+  fields:
+    item_id:
+      name: Grocery item ID
+      description: ID of an existing grocery item from the grocery card.
+      required: true
+      selector:
+        text:
+    store_ids:
+      name: Store IDs
+      description: Complete list of existing store IDs to assign. Use an empty list to remove all store assignments.
+      required: true
+      selector:
+        object:
+set_grocery_item_status:
+  name: Set grocery item status
+  description: Mark an existing grocery item pending or completed.
+  fields:
+    item_id:
+      name: Grocery item ID
+      description: ID of an item returned by the Deglaze Grocery List Lovelace card.
+      required: true
+      selector:
+        text:
+    status:
+      name: Status
+      description: Select pending to un-complete or completed to mark complete.
+      required: true
+      selector:
+        select:
+          options:
+            - pending
+            - completed
+add_meal_plan_item:
+  name: Add recipe to meal plan
+  description: Add a recipe to a day and meal slot.
+  fields:
+    recipe_id:
+      name: Recipe ID
+      description: Full namespaced recipe ID from the Deglaze Recipe Library card.
+      required: true
+      selector:
+        text:
+    date:
+      name: Date
+      description: Date in YYYY-MM-DD format.
+      required: true
+      selector:
+        date:
+    label:
+      name: Meal slot
+      description: Meal-plan slot.
+      required: true
+      selector:
+        select:
+          options:
+            - Breakfast
+            - Lunch
+            - Dinner
+            - Snack
+    is_leftovers:
+      name: Leftovers
+      description: Mark this planned meal as leftovers.
+      required: false
+      default: false
+      selector:
+        boolean:
+update_meal_plan_item:
+  name: Update planned meal
+  description: Update the date, meal slot, or leftovers flag for a planned item using its current version.
+  fields:
+    item_id:
+      name: Planned item ID
+      description: Item ID returned by the weekly meal planner.
+      required: true
+      selector:
+        text:
+    item_type:
+      name: Item type
+      description: Deglaze planned-item type (recipe or note).
+      required: true
+      selector:
+        select:
+          options:
+            - recipe
+            - note
+    version:
+      name: Item version
+      description: Current version returned by Deglaze.
+      required: true
+      selector:
+        number:
+          min: 0
+          mode: box
+    date:
+      name: New date
+      description: Optional date in YYYY-MM-DD format.
+      required: false
+      selector:
+        date:
+    label:
+      name: New meal slot
+      description: Optional meal slot.
+      required: false
+      selector:
+        select:
+          options:
+            - Breakfast
+            - Lunch
+            - Dinner
+            - Snack
+    is_leftovers:
+      name: Leftovers
+      description: Optional replacement value for the leftovers flag.
+      required: false
+      selector:
+        boolean:
+remove_meal_plan_item:
+  name: Remove planned meal
+  description: Remove a planned meal. The Lovelace card asks for confirmation first.
+  fields:
+    item_id:
+      name: Planned item ID
+      description: Item ID returned by the weekly meal planner.
+      required: true
+      selector:
+        text:
+set_recipe_collections:
+  name: Set recipe collections
+  description: Assign a recipe to or remove it from existing visible Deglaze collections. Collection definitions are not created or deleted.
+  fields:
+    recipe_id:
+      name: Recipe ID
+      description: Full recipe ID from the Deglaze Recipe Library card.
+      required: true
+      selector:
+        text:
+    collection_ids:
+      name: Collections
+      description: Complete selection of visible existing collections for this recipe.
+      required: true
+      selector:
+        object:
+refresh:
+  name: Refresh Deglaze
+  description: Refresh grocery data, recipe library, and meal plan now.
+test_auth_renewal:
+  name: Test authentication renewal
+  description: Simulate an expired access token in memory, refresh it through Firebase, and verify with a read-only grocery-list request. No list items are changed.
+test_error_handling:
+  name: Test error handling and recovery
+  description: Locally simulate one HTTP 503 response through the normal API error path, then make a real read-only grocery-list request to verify recovery. The simulated failure is not sent to Deglaze and no grocery items are changed.

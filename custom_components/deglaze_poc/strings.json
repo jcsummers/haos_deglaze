@@ -2,7 +2,7 @@
   "config": {
     "step": {
       "user": {
-        "title": "Connect Deglaze (proof of concept)",
+        "title": "Connect Deglaze",
         "description": "Enter the email address used for Deglaze. In the next step, paste a fresh sign-in link from your Deglaze email. Do not open/click the link before pasting it here, because the one-time code may be consumed.",
         "data": {
           "email": "Deglaze email address"
@@ -29,9 +29,56 @@
   },
   "entity": {
     "sensor": {
+      "grocery_list": {
+        "name": "Grocery List"
+      },
+      "recipe_library": {
+        "name": "Recipe Library"
+      },
+      "meal_plan": {
+        "name": "Meal Plan"
+      },
       "grocery_api_status": {
-        "name": "Grocery API Status"
+        "name": "API Status"
       }
+    }
+  },
+  "services": {
+    "test_auth_renewal": {
+      "name": "Test authentication renewal",
+      "description": "Simulate access-token expiry in memory, refresh through Firebase, then verify a read-only Deglaze request. No grocery items are changed."
+    },
+    "test_error_handling": {
+      "name": "Test error handling and recovery",
+      "description": "Simulate one local HTTP 503 response through the normal API error path, then verify a real read-only grocery-list request recovers. The simulated failure is not sent to Deglaze and no grocery items are changed."
+    },
+    "set_recipe_collections": {
+      "name": "Set recipe collections",
+      "description": "Assign a recipe to or remove it from existing visible Deglaze collections. Collection definitions are not created or deleted."
+    },
+    "update_meal_plan_item": {
+      "name": "Update planned meal",
+      "description": "Update a planned meal date, meal slot, or leftovers flag using the current item version."
+    },
+    "remove_meal_plan_item": {
+      "name": "Remove planned meal",
+      "description": "Remove a planned meal from Deglaze. The Lovelace weekly planner confirms before removal."
+    },
+    "create_grocery_store": {
+      "name": "Create grocery store",
+      "description": "Create a named Deglaze store."
+    },
+    "rename_grocery_store": {
+      "name": "Rename grocery store",
+      "description": "Rename an existing Deglaze store using its latest version."
+    },
+    "delete_grocery_store": {
+      "name": "Delete grocery store",
+      "description": "Delete a store definition. Items remain on the grocery list but lose this store association."
+    },
+    "set_grocery_item_stores": {
+      "name": "Set grocery item stores",
+      "description": "Replace the store assignments for an existing grocery item. Use an empty store list to remove all assignments."
     }
   }
 }
